@@ -32,6 +32,7 @@ along with sedutil.  If not, see <http://www.gnu.org/licenses/>.
 #include "DtaStructures.h"
 #include "DtaHexDump.h"
 #include "DtaDiskUSB.h"
+#include <fstream>
 
 using namespace std;
 
@@ -143,6 +144,16 @@ uint8_t DtaDiskNVMe::sendCmd(ATACOMMAND cmd, uint8_t protocol, uint16_t comID,
         sizeof(sptdS),
         &bytesReturn,
         NULL);
+
+    static int op = 0;
+    ofstream fout;
+    ++op;
+    LOG(I) << " ";
+    LOG(I) << (cmd == IF_RECV ? "recv" : "send") + std::to_string(op) + " '" + std::to_string(protocol) + "' '" + std::to_string(comID) + "'";
+    DtaHexDump(buffer, bufferlen);
+    fout.open((cmd == IF_RECV ? "recv" : "send") + std::to_string(op) + ".bin", ios::binary | ios::out);
+    fout.write((char*)buffer, bufferlen);
+    fout.close();
 
     if (0 == iRet)
     {
